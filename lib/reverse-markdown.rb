@@ -66,7 +66,7 @@ class ReverseMarkdown
           parse_element(child, element.name.to_sym)
         else
           if parent.eql?(:blockquote)
-            @output << child.to_s.gsub("\n ", "\n>")
+            @output << child.to_s.gsub("\n", "\n>")
           else
             @output << child.to_s
           end
@@ -97,12 +97,14 @@ class ReverseMarkdown
         "## "
       when :em
         "*"
+      when :br
+        "\n"
+        "\n>" if parent.eql?(:blockquote)
       when :strong
         "**"
       when :blockquote
-        # remove leading newline
-        type.children.first.value = ""
-        "> "
+        type.delete(type.elements[1]) if type.first.name.to_sym.eql?(:br) 
+        ">"
       when :code
         parent.eql?(:pre) ? "    " : "`"
       when :a
@@ -169,7 +171,7 @@ class ReverseMarkdown
     if element.name.to_sym.eql?(:code) and parent.eql?(:pre)
       element.text.gsub("\n","\n    ") << "\n"
     elsif parent.eql?(:blockquote)
-      element.text.gsub!("\n ","\n>")
+      element.text.gsub("\n","\n>")
     else
       element.text
     end
